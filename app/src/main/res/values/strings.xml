@@ -76,6 +76,8 @@
     <string name="time_limit_for_all_numbers">Time Limit for all numbers</string>
     <string name="limit_for_all_numbers_description">Set a global call duration limit for all outgoing numbers</string>
     <string name="call_start_buffer_time">Call Start Buffer Time</string>
-    <string name="reset_limit_on_each_call_desc">Reset the call limit timer on every new call</string>
     <string name="github_issues">GitHub Issues</string>
+    <string name="call_duration_limit">Call Duration Limit</string>
+    <string name="call_time_reminder">Call Time Reminder</string>
+    <string name="call_time_reminder_desc">Plays an audio tone and vibrates at selected intervals during calls</string>
 </resources>

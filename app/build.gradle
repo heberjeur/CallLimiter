@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
 }
 
 android {
@@ -23,7 +24,6 @@ android {
         includeInBundle = false
     }
 
-
     buildTypes {
         release {
             minifyEnabled true
@@ -31,8 +31,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
     }
     buildFeatures {
         viewBinding true
@@ -40,7 +43,7 @@ android {
 }
 
 dependencies {
-
+    implementation libs.core.ktx
     implementation libs.appcompat
     implementation libs.material
     implementation libs.constraintlayout
@@ -48,9 +51,8 @@ dependencies {
     implementation libs.navigation.ui
     implementation libs.activity
     implementation libs.work.runtime
+    implementation libs.libphonenumber
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
-    implementation 'com.google.android.material:material:<version>'
-    implementation 'com.googlecode.libphonenumber:libphonenumber:8.13.5'
 }
