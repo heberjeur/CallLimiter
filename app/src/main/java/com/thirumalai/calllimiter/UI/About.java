@@ -20,8 +20,7 @@ import com.thirumalai.calllimiter.Service.CommonService;
 
 public class About extends AppCompatActivity {
     TextView version;
-    ImageView back_btn, buyMeACoffeeImage, liberaPayImage, kofiImage;
-    Chip bitcoinChip;
+    ImageView back_btn;
     CardView sourceCode, changeLog, termsAndConditions, privacyPolicy;
 
     @Override
@@ -34,17 +33,12 @@ public class About extends AppCompatActivity {
         View rootView = findViewById(android.R.id.content);
         SystemBarHelper.setupStatusBarAppearance(getWindow(), getResources(), rootView);
 
-
         version = findViewById(R.id.version);
         sourceCode = findViewById(R.id.source_code);
         termsAndConditions = findViewById(R.id.terms_conditions_about);
         privacyPolicy = findViewById(R.id.privacy_policy_about);
         changeLog = findViewById(R.id.change_log);
         back_btn = findViewById(R.id.back_btn_about);
-        buyMeACoffeeImage = findViewById(R.id.buymeacoffee);
-        liberaPayImage = findViewById(R.id.liberapay);
-        kofiImage = findViewById(R.id.kofi);
-        bitcoinChip = findViewById(R.id.bitcoin_chip);
 
         PackageInfo packageInfo;
         try {
@@ -79,27 +73,6 @@ public class About extends AppCompatActivity {
             Intent intent = new Intent(About.this, Settings.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
-        });
-
-        buyMeACoffeeImage.setOnClickListener(view -> {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.buymeacoffee.com/thirumalaikg"));
-            startActivity(intent);
-        });
-
-        liberaPayImage.setOnClickListener(view -> {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://liberapay.com/thirumalaikg"));
-            startActivity(intent);
-        });
-
-        kofiImage.setOnClickListener(view -> {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://ko-fi.com/thirumalaikg"));
-            startActivity(intent);
-        });
-
-        bitcoinChip.setOnClickListener(view -> {
-            CommonService service = new CommonService();
-            service.copyToClipboard(this, getResources().getString(R.string.bitcoin_address));
-            Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
         });
     }
 }

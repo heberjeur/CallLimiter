@@ -24,10 +24,6 @@ Call Limiter is an Android application designed to help users set a time limit f
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/Thiru-Malai/CallLimiter/total?style=for-the-badge&label=GITHUB%20DOWNLOADS&color=green)
 [![IzzyOnDroid Monthly Downloads](https://img.shields.io/badge/dynamic/json?url=https://dlstats.izzyondroid.org/iod-stats-collector/stats/basic/monthly/rolling.json&query=$.['com.thirumalai.calllimiter']&label=IzzyOnDroid%20monthly%20downloads&style=for-the-badge&color=green)](https://apt.izzysoft.de/packages/com.thirumalai.calllimiter)
 [![IzzyOnDroid Yearly Downloads](https://img.shields.io/badge/dynamic/json?url=https://dlstats.izzyondroid.org/iod-stats-collector/stats/basic/yearly/rolling.json&query=$.['com.thirumalai.calllimiter']&label=IzzyOnDroid%20yearly%20downloads&style=for-the-badge&color=green)](https://apt.izzysoft.de/packages/com.thirumalai.calllimiter)
-
-<a href="https://buymeacoffee.com/thirumalaikg">
-    <img width="218" height="61" alt="buymeacoffee" src="https://github.com/user-attachments/assets/6149df1a-9555-4293-a8e5-1448e013201b" />
-</a>
 </div>
 
 <br>
@@ -99,13 +95,6 @@ Want to make **Call Limiter** even better? Here’s how you can help:
 - 💡 **Suggest Features** – Have an idea to improve the app? [Open a GitHub Issue](../../issues) and share your suggestion.
 - 🐞 **Report Issues** – Spotted a bug? [Log it on GitHub](../../issues) so it can be fixed in future updates.
 - ⭐ **Support the Project** – If you find this project useful, consider giving it a star to show your support.
-
-## ❤️ Sponsor
-The app is open-source, free to use, and contains no ads. Your support helps sustain full-time development.
-- 🍵 [Buy Me A Coffee](https://www.buymeacoffee.com/thirumalaikg)
-- ☕ [Kofi](https://ko-fi.com/thirumalaikg)
-- 💲 [Liberapay](https://en.liberapay.com/thirumalaikg/)
-- BTC - `bc1q26ag0k77ez63pd0zu492vj7dncfqmknkk7sjfh`
 
 ## 💡 Credits
 - [FoodYou](https://github.com/maksimowiczm/FoodYou) - I shamelessly x2 borrowed inspiration from this project.
