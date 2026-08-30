@@ -16,7 +16,7 @@ import com.google.android.material.textview.MaterialTextView;
 import com.thirumalai.calllimiter.R;
 
 public class TimerBottomSheet extends BottomSheetDialogFragment {
-    private NumberPicker hourPicker, minutePicker;
+    private NumberPicker hourPicker, minutePicker, secondPicker;
     private Button btnDeleteTimer, btnOk, btnCancel;
     private MaterialTextView displayPhoneNumberAndName;
     private String phoneNumber = "", name = "";
@@ -24,7 +24,7 @@ public class TimerBottomSheet extends BottomSheetDialogFragment {
 
     // Interface to send data back to MainActivity
     public interface OnTimeSelectedListener {
-        void onTimeSelected(int hours, int minutes);
+        void onTimeSelected(int hours, int minutes, int seconds);
         void onTimerReset();
     }
 
@@ -48,6 +48,7 @@ public class TimerBottomSheet extends BottomSheetDialogFragment {
 
         hourPicker = view.findViewById(R.id.hourPicker);
         minutePicker = view.findViewById(R.id.minutePicker);
+        secondPicker = view.findViewById(R.id.secondPicker);
         btnDeleteTimer = view.findViewById(R.id.btnDeleteTimer);
         btnOk = view.findViewById(R.id.btnOk);
         btnCancel = view.findViewById(R.id.btnCancel);
@@ -63,20 +64,23 @@ public class TimerBottomSheet extends BottomSheetDialogFragment {
             displayPhoneNumberAndName.setVisibility(View.GONE);
         }
 
-        // Configure Hour Picker (1 to 24)
+        // Configure Hour Picker (0 to 24)
         hourPicker.setMinValue(0);
         hourPicker.setMaxValue(24);
 
-        // Configure Minute Picker (0 to 55, step of 5)
-        String[] minuteValues = {"0", "1", "2", "3", "4", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55"};
+        // Configure Minute Picker (0 to 59)
         minutePicker.setMinValue(0);
-        minutePicker.setMaxValue(minuteValues.length - 1);
-        minutePicker.setDisplayedValues(minuteValues);
+        minutePicker.setMaxValue(59);
+
+        // Configure Second Picker (0 to 59)
+        secondPicker.setMinValue(0);
+        secondPicker.setMaxValue(59);
 
         // Delete Timer (Reset Pickers)
         btnDeleteTimer.setOnClickListener(v -> {
             hourPicker.setValue(0);
             minutePicker.setValue(0);
+            secondPicker.setValue(0);
             if (timeSelectedListener != null) {
                 timeSelectedListener.onTimerReset();
             }
@@ -85,12 +89,13 @@ public class TimerBottomSheet extends BottomSheetDialogFragment {
         // OK Button (Return Selected Values)
         btnOk.setOnClickListener(v -> {
             int selectedHours = hourPicker.getValue();
-            int selectedMinutes = Integer.parseInt(minuteValues[minutePicker.getValue()]);
-            if(selectedHours == 0 && selectedMinutes == 0){
+            int selectedMinutes = minutePicker.getValue();
+            int selectedSeconds = secondPicker.getValue();
+            if(selectedHours == 0 && selectedMinutes == 0 && selectedSeconds == 0){
                 Toast.makeText(getActivity(), "Please choose a proper limit", Toast.LENGTH_SHORT).show();
             } else{
                 if (timeSelectedListener != null) {
-                    timeSelectedListener.onTimeSelected(selectedHours, selectedMinutes);
+                    timeSelectedListener.onTimeSelected(selectedHours, selectedMinutes, selectedSeconds);
                 }
                 dismiss();
             }

@@ -22,6 +22,8 @@ public class OnboardingActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        PreferenceHelper.init(this);
+        com.thirumalai.calllimiter.Utils.ThemeUtils.applyTheme(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_onboarding);
 

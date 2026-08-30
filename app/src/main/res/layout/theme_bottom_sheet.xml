@@ -68,4 +68,25 @@
             android:layout_weight="0.1"/>
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/option_oled"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:text="@string/dark_oled"
+            android:textSize="16sp"
+            android:background="?attr/selectableItemBackground"
+            android:layout_weight="0.9"/>
+
+        <RadioButton
+            android:id="@+id/oled_radio_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.1"/>
+    </LinearLayout>
+
 </LinearLayout>

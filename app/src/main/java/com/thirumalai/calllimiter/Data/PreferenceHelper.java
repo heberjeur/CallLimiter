@@ -142,6 +142,8 @@ public class PreferenceHelper {
         return settingsStore.getBoolean(RESET_TIME_LIMIT_EACH_CALL, false);
     }
 
+    private static final String WARNING_REMINDER_THRESHOLDS_KEY = "warning_reminder_thresholds_key";
+
     public static void updateWarningReminderEnabled(boolean enabled){
         settingsEditor.putBoolean(WARNING_REMINDER_KEY, enabled).apply();
     }
@@ -156,6 +158,35 @@ public class PreferenceHelper {
 
     public static int getWarningReminderTime(){
         return settingsStore.getInt(WARNING_REMINDER_TIME_KEY, 15);
+    }
+
+    public static void updateWarningReminderThresholds(java.util.Set<Integer> thresholds){
+        StringBuilder sb = new StringBuilder();
+        for (Integer t : thresholds) {
+            if (sb.length() > 0) sb.append(",");
+            sb.append(t);
+        }
+        settingsEditor.putString(WARNING_REMINDER_THRESHOLDS_KEY, sb.toString()).apply();
+    }
+
+    public static java.util.Set<Integer> getWarningReminderThresholds(){
+        String saved = settingsStore.getString(WARNING_REMINDER_THRESHOLDS_KEY, null);
+        java.util.Set<Integer> set = new java.util.TreeSet<>(java.util.Collections.reverseOrder());
+        if (saved == null || saved.trim().isEmpty()) {
+            int singleTime = settingsStore.getInt(WARNING_REMINDER_TIME_KEY, 15);
+            set.add(singleTime);
+            return set;
+        }
+        String[] parts = saved.split(",");
+        for (String p : parts) {
+            try {
+                set.add(Integer.parseInt(p.trim()));
+            } catch (Exception ignored) {}
+        }
+        if (set.isEmpty()) {
+            set.add(15);
+        }
+        return set;
     }
 
 //    public static Map<String, ?> setAllContactLimits(Context context) {

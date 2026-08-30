@@ -28,6 +28,7 @@ public class Permissions extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        com.thirumalai.calllimiter.Utils.ThemeUtils.applyTheme(this);
         super.onCreate(savedInstanceState);
 //        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_permissions);

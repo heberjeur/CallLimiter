@@ -69,7 +69,16 @@
     <string name="call_limit_warning_reminder">Call Limit Warning Reminder</string>
     <string name="call_limit_warning_reminder_desc">Plays a tone and vibrates before the call limit is reached</string>
     <string name="reminder_time">Reminder Time</string>
+    <string name="seconds">Seconds</string>
+    <string name="dark_oled">Dark (OLED)</string>
+    <string name="warning_reminder_thresholds">Warning Reminder Timings</string>
+    <string name="_5_s">5 s</string>
     <string name="_15_s">15 s</string>
     <string name="_30_s">30 s</string>
     <string name="_60_s">60 s</string>
+    <string name="time_limit_for_all_numbers">Time Limit for all numbers</string>
+    <string name="limit_for_all_numbers_description">Set a global call duration limit for all outgoing numbers</string>
+    <string name="call_start_buffer_time">Call Start Buffer Time</string>
+    <string name="reset_limit_on_each_call_desc">Reset the call limit timer on every new call</string>
+    <string name="github_issues">GitHub Issues</string>
 </resources>

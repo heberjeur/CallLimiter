@@ -51,7 +51,7 @@ public class CallMonitorService extends Service {
     private PhoneStateListener phoneStateListener;
     private PhoneNumberUtil phoneNumberUtil;
     private boolean isTimerRunning = false, islimitRestForEachCallEnabled = false;
-    private boolean hasTriggeredWarning = false;
+    private java.util.Set<Integer> triggeredWarnings = new java.util.HashSet<>();
     private int elapsedTime = 1; // Time in seconds
     private static CallMonitorService instance;
     private PendingIntent pendingIntent;
@@ -199,7 +199,7 @@ public class CallMonitorService extends Service {
             return;
         }
         isTimerRunning = true;
-        hasTriggeredWarning = false;
+        triggeredWarnings.clear();
         endCallRunnable = () -> {
             endCall();
         };
@@ -211,7 +211,7 @@ public class CallMonitorService extends Service {
         if (isTimerRunning) {
             isTimerRunning = false;
         }
-        hasTriggeredWarning = false;
+        triggeredWarnings.clear();
         if (endCallRunnable != null) {
             handler.removeCallbacks(endCallRunnable);
             handler.removeCallbacks(updateRunnable); // Stop updating notification
@@ -231,10 +231,10 @@ public class CallMonitorService extends Service {
 
                 int remainingSeconds = (callTimeLimit / 1000) - elapsedTime;
                 boolean isWarningReminderEnabled = PreferenceHelper.getWarningReminderEnabled();
-                int warningReminderTime = PreferenceHelper.getWarningReminderTime();
+                java.util.Set<Integer> warningThresholds = PreferenceHelper.getWarningReminderThresholds();
 
-                if (isWarningReminderEnabled && remainingSeconds == warningReminderTime && !hasTriggeredWarning) {
-                    hasTriggeredWarning = true;
+                if (isWarningReminderEnabled && warningThresholds.contains(remainingSeconds) && !triggeredWarnings.contains(remainingSeconds)) {
+                    triggeredWarnings.add(remainingSeconds);
                     triggerWarningAlert();
                 }
 

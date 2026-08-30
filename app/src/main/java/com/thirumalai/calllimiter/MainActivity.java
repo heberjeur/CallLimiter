@@ -71,7 +71,7 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity {
 
     private Button setLimit, selectFromContacts;
-    private int selectedHour = -1, selectedMinute = -1;
+    private int selectedHour = -1, selectedMinute = -1, selectedSecond = -1;
     private TextInputEditText phoneNumberField, contactNameField;
     boolean isPhoneAvailable = false, isTimeAvailable = false;
     private static final int NOTIFICATION_PERMISSION_CODE = 1001;
@@ -80,13 +80,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        PreferenceHelper.init(this);
+        com.thirumalai.calllimiter.Utils.ThemeUtils.applyTheme(this);
         super.onCreate(savedInstanceState);
 
-        PreferenceHelper.init(this);
-
         boolean isFirstTimeLogin = PreferenceHelper.isFirstTimeLogin();
-        String selectedTheme = PreferenceHelper.getTheme();
-        setTheme(selectedTheme);
         if(isFirstTimeLogin) {
             PreferenceHelper.saveBufferTime(10);
             startActivity(new Intent(this, OnboardingActivity.class));
@@ -141,11 +139,12 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 TimerBottomSheet bottomSheet = new TimerBottomSheet(new TimerBottomSheet.OnTimeSelectedListener() {
                     @Override
-                    public void onTimeSelected(int hours, int minutes) {
-                        System.out.println(hours + " " + minutes);
+                    public void onTimeSelected(int hours, int minutes, int seconds) {
+                        System.out.println(hours + " " + minutes + " " + seconds);
                         selectedHour = hours;
                         selectedMinute = minutes;
-                        setLimit.setText("SET LIMIT - " + hours + " hrs " + minutes + " mins");
+                        selectedSecond = seconds;
+                        setLimit.setText("SET LIMIT - " + hours + " hrs " + minutes + " mins " + seconds + " secs");
                     }
 
                     @Override
@@ -162,11 +161,11 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 String phoneNumber =  Objects.requireNonNull(phoneNumberField.getText()).toString().trim();
                 String contactName = Objects.requireNonNull(contactNameField.getText()).toString().trim();
-                if(phoneNumber.isEmpty() || selectedHour == -1 || selectedMinute == -1){
+                if(phoneNumber.isEmpty() || selectedHour == -1 || selectedMinute == -1 || selectedSecond == -1){
                     Toast.makeText(MainActivity.this, "Please make sure phone number and time limit is set.", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                int totalSeconds = (selectedHour * 3600) + (selectedMinute * 60);
+                int totalSeconds = (selectedHour * 3600) + (selectedMinute * 60) + selectedSecond;
 
                 // Save the phone number as the key and time limit as the value
                 JSONObject jsonObject = new JSONObject();
@@ -459,10 +458,11 @@ public class MainActivity extends AppCompatActivity {
                 }
                 TimerBottomSheet bottomSheet = new TimerBottomSheet(new TimerBottomSheet.OnTimeSelectedListener() {
                     @Override
-                    public void onTimeSelected(int hours, int minutes) {
-                        System.out.println(hours + " " + minutes);
+                    public void onTimeSelected(int hours, int minutes, int seconds) {
+                        System.out.println(hours + " " + minutes + " " + seconds);
                         selectedHour = hours;
                         selectedMinute = minutes;
+                        selectedSecond = seconds;
 
                         String phoneNumberData = PreferenceHelper.getContact(phoneNumber);
 
@@ -477,6 +477,7 @@ public class MainActivity extends AppCompatActivity {
                                 // Resetting time
                                 selectedHour = -1;
                                 selectedMinute = -1;
+                                selectedSecond = -1;
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -489,7 +490,7 @@ public class MainActivity extends AppCompatActivity {
                         JSONObject jsonObject = new JSONObject(phoneNumberData);
                         int remainingTime =  jsonObject.getInt("remaining_time");
                         int limit = jsonObject.getInt("limit");
-                        int updatedLimit = (selectedHour * 3600) + (selectedMinute * 60);
+                        int updatedLimit = (selectedHour * 3600) + (selectedMinute * 60) + selectedSecond;
                         if(limit == remainingTime){
                             jsonObject.put("limit", updatedLimit);
                             jsonObject.put("remaining_time", updatedLimit);
@@ -642,16 +643,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setTheme(String selectedTheme){
-        switch(selectedTheme){
-            case "Light":
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-            break;
-            case "Dark":
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-            break;
-            default:
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-        }
+        com.thirumalai.calllimiter.Utils.ThemeUtils.applyTheme(this);
     }
 
     private void enableEditing(EditText editText) {

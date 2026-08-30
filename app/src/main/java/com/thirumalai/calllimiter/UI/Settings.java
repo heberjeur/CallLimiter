@@ -1,13 +1,9 @@
 package com.thirumalai.calllimiter.UI;
 
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -15,36 +11,37 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.thirumalai.calllimiter.BottomSheets.TimerBottomSheet;
-import com.thirumalai.calllimiter.Service.CallMonitorService;
-import com.thirumalai.calllimiter.MainActivity;
 import com.thirumalai.calllimiter.Data.PreferenceHelper;
 import com.thirumalai.calllimiter.R;
 import com.thirumalai.calllimiter.Utils.SystemBarHelper;
+import com.thirumalai.calllimiter.Utils.ThemeUtils;
 
 import org.json.JSONObject;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class Settings extends AppCompatActivity {
     private LinearLayout layoutTheme, githubIssues, permissions, about, timeLimitForAllNumbers, warningReminderTimeLayout;
     private TextView selectedThemeText, bufferValueText, timeLimit, warningReminderTimeText;
     private ImageView backBtn;
-    private SeekBar bufferBar, warningReminderBar;
+    private SeekBar bufferBar;
     private MaterialSwitch switchBtn, callStartBufferSwitchBtn, limitResetForEachCallSwitchBtn, warningReminderSwitchBtn;
     private boolean isChecked = false, isCallStartBufferEnabled = true, islimitRestForEachCallEnabled = false, isWarningReminderEnabled = true;
     private final int[] BUFFER_VALUES = {10, 20, 30, 60, 120, 180, 240, 300};
-    private final int[] WARNING_REMINDER_VALUES = {5, 10, 15, 20, 30, 45, 60, 120};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ThemeUtils.applyTheme(this);
         super.onCreate(savedInstanceState);
-//        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_settings);
 
         View rootView = findViewById(android.R.id.content);
@@ -52,45 +49,36 @@ public class Settings extends AppCompatActivity {
 
         PreferenceHelper.init(this);
 
-        selectedThemeText = findViewById(R.id.theme_text);
+        selectedThemeText = findViewById(R.id.selected_theme_text);
         backBtn = findViewById(R.id.back_btn);
-        layoutTheme = findViewById(R.id.theme_layout);
+        layoutTheme = findViewById(R.id.theme);
         githubIssues = findViewById(R.id.github_issues);
         permissions = findViewById(R.id.permissions);
         about = findViewById(R.id.about_settings);
-        bufferBar = findViewById(R.id.emergency_buffer_time_seek_bar);
-        bufferValueText = findViewById(R.id.emergency_buffer_time_text);
+        bufferBar = findViewById(R.id.buffer_time_seek_bar);
+        bufferValueText = findViewById(R.id.buffer_time_value);
         switchBtn = findViewById(R.id.limit_all_numbers_switch);
-        timeLimitForAllNumbers = findViewById(R.id.time_limit_all_numbers_layout);
+        timeLimitForAllNumbers = findViewById(R.id.time_limit_all_numbers);
         timeLimit = findViewById(R.id.time_limit_all_numbers_text);
         callStartBufferSwitchBtn = findViewById(R.id.call_start_buffer_time);
         limitResetForEachCallSwitchBtn = findViewById(R.id.limit_reset_each_call);
         warningReminderSwitchBtn = findViewById(R.id.warning_reminder_switch);
         warningReminderTimeLayout = findViewById(R.id.warning_reminder_time_layout);
         warningReminderTimeText = findViewById(R.id.warning_reminder_time_text);
-        warningReminderBar = findViewById(R.id.warning_reminder_time_seek_bar);
 
         isChecked = PreferenceHelper.getLimitForAllNumbersEnabled();
         isCallStartBufferEnabled = PreferenceHelper.getCallStartBufferValue();
         islimitRestForEachCallEnabled = PreferenceHelper.getLimitForEachCallValue();
         isWarningReminderEnabled = PreferenceHelper.getWarningReminderEnabled();
-        int warningReminderTime = PreferenceHelper.getWarningReminderTime();
         int timeLimit1 = PreferenceHelper.getTimeLimitForAllNumbers();
 
         int hours = timeLimit1 / 3600;
         int minutes = (timeLimit1 % 3600) / 60;
-        String hoursStr = "00", minutesStr = "00";
-        if(hours < 10){
-            hoursStr = "0" + hours;
-        } else {
-            hoursStr = Integer.toString(hours);
-        }
-        if(minutes < 10){
-            minutesStr = "0" + minutes;
-        } else {
-            minutesStr = Integer.toString(minutes);
-        }
-        timeLimit.setText(hoursStr + ":" + minutesStr + ":" + "00");
+        int seconds = timeLimit1 % 60;
+        String hoursStr = (hours < 10) ? "0" + hours : Integer.toString(hours);
+        String minutesStr = (minutes < 10) ? "0" + minutes : Integer.toString(minutes);
+        String secondsStr = (seconds < 10) ? "0" + seconds : Integer.toString(seconds);
+        timeLimit.setText(hoursStr + ":" + minutesStr + ":" + secondsStr);
 
         callStartBufferSwitchBtn.setChecked(isCallStartBufferEnabled);
 
@@ -110,126 +98,82 @@ public class Settings extends AppCompatActivity {
             }
         }
 
-        selectedThemeText.setText(PreferenceHelper.getTheme());
+        String currentTheme = PreferenceHelper.getTheme();
+        if ("OLED".equals(currentTheme)) {
+            selectedThemeText.setText(getString(R.string.dark_oled));
+        } else {
+            selectedThemeText.setText(currentTheme);
+        }
         bufferBar.setProgress(index);
         bufferValueText.setText(formatBufferTime(bufferTime));
 
         limitResetForEachCallSwitchBtn.setChecked(islimitRestForEachCallEnabled);
 
-        layoutTheme.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showThemeBottomSheet();
-            }
-        });
+        layoutTheme.setOnClickListener(v -> showThemeBottomSheet());
 
-        githubIssues.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Thiru-Malai/CallLimiter/issues"));
-                startActivity(intent);
-            }
-        });
-
-        permissions.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Settings.this, Permissions.class);
-                startActivity(intent);
-            }
-        });
-
-        backBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Settings.this, MainActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-            }
-        });
+        backBtn.setOnClickListener(view -> finish());
 
         bufferBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 int selectedValue = BUFFER_VALUES[progress];
                 bufferValueText.setText(formatBufferTime(selectedValue));
-
                 PreferenceHelper.saveBufferTime(selectedValue);
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
+            public void onStartTrackingTouch(SeekBar seekBar) { }
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
+            public void onStopTrackingTouch(SeekBar seekBar) { }
         });
 
-        about.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Settings.this, About.class);
-                startActivity(intent);
-            }
+        about.setOnClickListener(view -> {
+            Intent intent = new Intent(Settings.this, About.class);
+            startActivity(intent);
+        });
+
+        permissions.setOnClickListener(view -> {
+            Intent intent = new Intent(Settings.this, Permissions.class);
+            startActivity(intent);
         });
 
         callStartBufferSwitchBtn.setOnCheckedChangeListener((compoundButton, b) -> PreferenceHelper.updateCallStartBufferValue(b));
 
-        switchBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                PreferenceHelper.updateLimitForAllNumbersEnabled(b);
-                if(b){
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        startForegroundService(new Intent(getApplicationContext(), CallMonitorService.class));
-                        Log.d("Settings", "Started Foreground Service from Settings");
-                    } else {
-                        Log.d("Settings", "Staring Foreground Failed from Settings");
-                    }
-                    timeLimitForAllNumbers.setVisibility(View.VISIBLE);
-                } else {
-                    Map<String, ?> allEntries = PreferenceHelper.getAllContact();
-                    if(allEntries.isEmpty()){
-                        Intent stopForegroundService = new Intent(getApplicationContext(), CallMonitorService.class);
-                        stopService(stopForegroundService);
-                        Log.d("Settings", "Stopped Foreground Service from Settings");
-                    }
-                    timeLimitForAllNumbers.setVisibility(View.GONE);
-                }
+        githubIssues.setOnClickListener(view -> {
+            String url = "https://github.com/Thiru-Malai/CallLimiter/issues";
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(url));
+            startActivity(intent);
+        });
+
+        switchBtn.setOnCheckedChangeListener((compoundButton, b) -> {
+            PreferenceHelper.updateLimitForAllNumbersEnabled(b);
+            isChecked = b;
+            if(b){
+                timeLimitForAllNumbers.setVisibility(View.VISIBLE);
+            } else {
+                timeLimitForAllNumbers.setVisibility(View.GONE);
             }
         });
 
         timeLimit.setOnClickListener(view -> {
-                TimerBottomSheet bottomSheet = new TimerBottomSheet(new TimerBottomSheet.OnTimeSelectedListener() {
-                    @Override
-                    public void onTimeSelected(int hours, int minutes) {
-                        System.out.println(hours + " " + minutes);
+            TimerBottomSheet bottomSheet = new TimerBottomSheet(new TimerBottomSheet.OnTimeSelectedListener() {
+                @Override
+                public void onTimeSelected(int hours1, int minutes1, int seconds1) {
+                    String hStr = (hours1 < 10) ? "0" + hours1 : Integer.toString(hours1);
+                    String mStr = (minutes1 < 10) ? "0" + minutes1 : Integer.toString(minutes1);
+                    String sStr = (seconds1 < 10) ? "0" + seconds1 : Integer.toString(seconds1);
+                    timeLimit.setText(hStr + ":" + mStr + ":" + sStr);
 
-                        String hoursStr = "00", minutesStr = "00";
-                        if(hours < 10){
-                            hoursStr = "0" + hours;
-                        } else {
-                            hoursStr = Integer.toString(hours);
-                        }
-                        if(minutes < 10){
-                            minutesStr = "0" + minutes;
-                        } else {
-                            minutesStr = Integer.toString(minutes);
-                        }
-                        timeLimit.setText(hoursStr + ":" + minutesStr + ":" + "00");
+                    int timeLimitInSeconds = (hours1 * 3600) + (minutes1 * 60) + seconds1;
+                    PreferenceHelper.updateTimeLimitForAllNumbers(timeLimitInSeconds);
+                }
 
-                        int timeLimitInSeconds = (hours * 3600) + (minutes * 60);
-
-                        PreferenceHelper.updateTimeLimitForAllNumbers(timeLimitInSeconds);
-                    }
-
-                    @Override
-                    public void onTimerReset() { }
-                });
-                bottomSheet.show(getSupportFragmentManager(), "TimerBottomSheet");
+                @Override
+                public void onTimerReset() { }
+            });
+            bottomSheet.show(getSupportFragmentManager(), "TimerBottomSheet");
         });
 
         limitResetForEachCallSwitchBtn.setOnCheckedChangeListener((compoundButton, b) -> {
@@ -239,10 +183,8 @@ public class Settings extends AppCompatActivity {
                 for (String phoneNumber : all.keySet()) {
                     try{
                         JSONObject jsonObject = new JSONObject((String) Objects.requireNonNull(all.get(phoneNumber)));
-
                         int limit = jsonObject.getInt("limit");
                         jsonObject.put("remaining_time", limit);
-
                         PreferenceHelper.saveContact(phoneNumber, jsonObject.toString());
                     } catch (Exception e){
                         e.printStackTrace();
@@ -253,41 +195,53 @@ public class Settings extends AppCompatActivity {
 
         warningReminderSwitchBtn.setChecked(isWarningReminderEnabled);
         warningReminderTimeLayout.setVisibility(isWarningReminderEnabled ? View.VISIBLE : View.GONE);
-
-        warningReminderBar.setMax(WARNING_REMINDER_VALUES.length - 1);
-        int reminderIndex = 2;
-        for(int i = 0; i < WARNING_REMINDER_VALUES.length; i++){
-            if(WARNING_REMINDER_VALUES[i] == warningReminderTime){
-                reminderIndex = i;
-                break;
-            }
-        }
-        warningReminderBar.setProgress(reminderIndex);
-        warningReminderTimeText.setText(formatBufferTime(warningReminderTime));
+        warningReminderTimeText.setText(formatThresholds(PreferenceHelper.getWarningReminderThresholds()));
 
         warningReminderSwitchBtn.setOnCheckedChangeListener((compoundButton, enabled) -> {
             PreferenceHelper.updateWarningReminderEnabled(enabled);
             warningReminderTimeLayout.setVisibility(enabled ? View.VISIBLE : View.GONE);
         });
 
-        warningReminderBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                int selectedValue = WARNING_REMINDER_VALUES[progress];
-                warningReminderTimeText.setText(formatBufferTime(selectedValue));
-                PreferenceHelper.updateWarningReminderTime(selectedValue);
-            }
+        warningReminderTimeLayout.setOnClickListener(v -> showWarningThresholdsDialog());
+    }
 
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
+    private void showWarningThresholdsDialog() {
+        String[] labels = {"5 s", "10 s", "15 s", "20 s", "30 s", "45 s", "60 s", "120 s"};
+        int[] values = {5, 10, 15, 20, 30, 45, 60, 120};
+        boolean[] checkedItems = new boolean[values.length];
+        Set<Integer> currentThresholds = PreferenceHelper.getWarningReminderThresholds();
 
-            }
+        for (int i = 0; i < values.length; i++) {
+            checkedItems[i] = currentThresholds.contains(values[i]);
+        }
 
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.warning_reminder_thresholds)
+                .setMultiChoiceItems(labels, checkedItems, (dialog, which, isChecked1) -> checkedItems[which] = isChecked1)
+                .setPositiveButton(R.string.ok, (dialog, which) -> {
+                    Set<Integer> newThresholds = new TreeSet<>(Collections.reverseOrder());
+                    for (int i = 0; i < values.length; i++) {
+                        if (checkedItems[i]) {
+                            newThresholds.add(values[i]);
+                        }
+                    }
+                    if (newThresholds.isEmpty()) {
+                        newThresholds.add(15);
+                    }
+                    PreferenceHelper.updateWarningReminderThresholds(newThresholds);
+                    warningReminderTimeText.setText(formatThresholds(newThresholds));
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
 
-            }
-        });
+    private String formatThresholds(Set<Integer> thresholds) {
+        StringBuilder sb = new StringBuilder();
+        for (Integer t : thresholds) {
+            if (sb.length() > 0) sb.append(", ");
+            sb.append(formatBufferTime(t));
+        }
+        return sb.length() > 0 ? sb.toString() : "15 s";
     }
 
     private void showThemeBottomSheet() {
@@ -300,76 +254,95 @@ public class Settings extends AppCompatActivity {
         LinearLayout optionSystem = sheetView.findViewById(R.id.option_system);
         LinearLayout optionLight = sheetView.findViewById(R.id.option_light);
         LinearLayout optionDark = sheetView.findViewById(R.id.option_dark);
+        LinearLayout optionOled = sheetView.findViewById(R.id.option_oled);
 
         RadioButton systemRadioBtn = sheetView.findViewById(R.id.system_radio_btn);
         RadioButton lightRadioBtn = sheetView.findViewById(R.id.light_radio_btn);
         RadioButton darkRadioBtn = sheetView.findViewById(R.id.dark_radio_btn);
+        RadioButton oledRadioBtn = sheetView.findViewById(R.id.oled_radio_btn);
 
         switch (selectedTheme){
-            case "System":
-                systemRadioBtn.setChecked(true);
-            break;
             case "Light":
                 lightRadioBtn.setChecked(true);
-            break;
+                break;
             case "Dark":
                 darkRadioBtn.setChecked(true);
-            break;
+                break;
+            case "OLED":
+                if (oledRadioBtn != null) oledRadioBtn.setChecked(true);
+                break;
+            default:
+                systemRadioBtn.setChecked(true);
+                break;
         }
 
         optionSystem.setOnClickListener(v -> {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
             PreferenceHelper.saveTheme("System");
             selectedThemeText.setText("System");
+            ThemeUtils.applyTheme(Settings.this);
+            recreate();
             bottomSheetDialog.dismiss();
         });
 
         optionLight.setOnClickListener(v -> {
-            int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-            if(nightModeFlags != Configuration.UI_MODE_NIGHT_NO){
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-            }
             PreferenceHelper.saveTheme("Light");
             selectedThemeText.setText("Light");
+            ThemeUtils.applyTheme(Settings.this);
+            recreate();
             bottomSheetDialog.dismiss();
         });
 
         optionDark.setOnClickListener(v -> {
-            int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-            if(nightModeFlags != Configuration.UI_MODE_NIGHT_YES){
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-            }
             PreferenceHelper.saveTheme("Dark");
             selectedThemeText.setText("Dark");
+            ThemeUtils.applyTheme(Settings.this);
+            recreate();
             bottomSheetDialog.dismiss();
         });
 
+        if (optionOled != null) {
+            optionOled.setOnClickListener(v -> {
+                PreferenceHelper.saveTheme("OLED");
+                selectedThemeText.setText(getString(R.string.dark_oled));
+                ThemeUtils.applyTheme(Settings.this);
+                recreate();
+                bottomSheetDialog.dismiss();
+            });
+        }
+
         systemRadioBtn.setOnClickListener(v -> {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
             PreferenceHelper.saveTheme("System");
             selectedThemeText.setText("System");
+            ThemeUtils.applyTheme(Settings.this);
+            recreate();
             bottomSheetDialog.dismiss();
         });
 
         lightRadioBtn.setOnClickListener(v -> {
-            int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-            if(nightModeFlags != Configuration.UI_MODE_NIGHT_NO){
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-            }
             PreferenceHelper.saveTheme("Light");
             selectedThemeText.setText("Light");
+            ThemeUtils.applyTheme(Settings.this);
+            recreate();
             bottomSheetDialog.dismiss();
         });
 
         darkRadioBtn.setOnClickListener(v -> {
-            int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-            if(nightModeFlags != Configuration.UI_MODE_NIGHT_YES){
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-            }
             PreferenceHelper.saveTheme("Dark");
             selectedThemeText.setText("Dark");
+            ThemeUtils.applyTheme(Settings.this);
+            recreate();
             bottomSheetDialog.dismiss();
         });
+
+        if (oledRadioBtn != null) {
+            oledRadioBtn.setOnClickListener(v -> {
+                PreferenceHelper.saveTheme("OLED");
+                selectedThemeText.setText(getString(R.string.dark_oled));
+                ThemeUtils.applyTheme(Settings.this);
+                recreate();
+                bottomSheetDialog.dismiss();
+            });
+        }
 
         bottomSheetDialog.show();
     }
